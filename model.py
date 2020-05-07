@@ -253,7 +253,7 @@ class OpenUnmix(nn.Module):
 
         max_shape = max(max(max(x.shape[0], x1.shape[0]), x2.shape[0]), x3.shape[0])
 
-        x_pad, lstm_out_pad, x1_pad, x2_pad, x3_pad = x, lstm_out[0], x1, x2, x3
+        x_pad, lstm_out_pad, x1_pad, x2_pad, x3_pad = x.clone(), lstm_out[0].clone(), x1.clone(), x2.clone(), x3.clone()
         if x.shape[0] < max_shape:
             x_pad = torch.zeros(max_shape - x.shape[0], x.shape[1], x.shape[2]).to(device)
             x1_pad = torch.cat([x, x_pad], dim=0)
