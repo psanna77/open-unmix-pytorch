@@ -148,7 +148,7 @@ class OpenUnmix(nn.Module):
         )
 
         self.fc2 = Linear(
-            in_features=hidden_size*2,
+            in_features=hidden_size*2*3,
             out_features=hidden_size,
             bias=False
         )
@@ -187,7 +187,7 @@ class OpenUnmix(nn.Module):
             torch.ones(self.nb_output_bins).float()
         )
 
-    def forward(self, x):
+    def half_forward(self, x):
         # check for waveform or spectrogram
         # transform to spectrogram if (nb_samples, nb_channels, nb_timesteps)
         # and reduce feature dimensions, therefore we reshape
@@ -205,18 +205,45 @@ class OpenUnmix(nn.Module):
 
         # to (nb_frames*nb_samples, nb_channels*nb_bins)
         # and encode to (nb_frames*nb_samples, hidden_size)
-        x = self.fc1(x.reshape(-1, nb_channels*self.nb_bins))
+        x = self.fc1(x.reshape(-1, nb_channels * self.nb_bins))
         # normalize every instance in a batch
         x = self.bn1(x)
         x = x.reshape(nb_frames, nb_samples, self.hidden_size)
         # squash range ot [-1, 1]
         x = torch.tanh(x)
 
+        return x
+
+    def forward(self, x, x1, x2, x3):
+        # # check for waveform or spectrogram
+        # # transform to spectrogram if (nb_samples, nb_channels, nb_timesteps)
+        # # and reduce feature dimensions, therefore we reshape
+        # x = self.transform(x)
+        # nb_frames, nb_samples, nb_channels, nb_bins = x.data.shape
+        #
+        # mix = x.detach().clone()
+        #
+        # # crop
+        # x = x[..., :self.nb_bins]
+        #
+        # # shift and scale input to mean=0 std=1 (across all bins)
+        # x += self.input_mean
+        # x *= self.input_scale
+        #
+        # # to (nb_frames*nb_samples, nb_channels*nb_bins)
+        # # and encode to (nb_frames*nb_samples, hidden_size)
+        # x = self.fc1(x.reshape(-1, nb_channels*self.nb_bins))
+        # # normalize every instance in a batch
+        # x = self.bn1(x)
+        # x = x.reshape(nb_frames, nb_samples, self.hidden_size)
+        # # squash range ot [-1, 1]
+        # x = torch.tanh(x)
+
         # apply 3-layers of stacked LSTM
         lstm_out = self.lstm(x)
 
         # lstm skip connection
-        x = torch.cat([x, lstm_out[0]], -1)
+        x = torch.cat([x, lstm_out[0], x1, x2, x3], -1)
 
         # first dense stage + batch norm
         x = self.fc2(x.reshape(-1, x.shape[-1]))
