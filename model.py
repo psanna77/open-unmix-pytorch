@@ -243,7 +243,7 @@ class OpenUnmix(nn.Module):
         lstm_out = self.lstm(x)
 
         print(x.shape)
-        print(lstm_out[0])
+        print(lstm_out)
         print(x1.shape)
         print(x2.shape)
         print(x3.shape)
