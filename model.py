@@ -286,62 +286,62 @@ class Separator(nn.Module):
                  ):
         super(Separator, self).__init__()
         # Vocals
-        unmix_v = model.OpenUnmix(
-            input_mean=mean,
-            input_scale=scale,
-            nb_channels=1,
-            hidden_size=256,
-            n_fft=2048,
-            n_hop=1024,
-            max_bin=64,
-            sample_rate=44100
+        self.unmix_v = model.OpenUnmix(
+            input_mean=input_mean,
+            input_scale=input_scale,
+            nb_channels=nb_channels,
+            hidden_size=hidden_size,
+            n_fft=n_fft,
+            n_hop=n_hop,
+            max_bin=max_bin,
+            sample_rate=sample_rate
         ).to(device)
 
         # Drums
-        unmix_d = model.OpenUnmix(
-            input_mean=mean,
-            input_scale=scale,
-            nb_channels=1,
-            hidden_size=256,
-            n_fft=2048,
-            n_hop=1024,
-            max_bin=64,
-            sample_rate=44100
+        self.unmix_d = model.OpenUnmix(
+            input_mean=input_mean,
+            input_scale=input_scale,
+            nb_channels=nb_channels,
+            hidden_size=hidden_size,
+            n_fft=n_fft,
+            n_hop=n_hop,
+            max_bin=max_bin,
+            sample_rate=sample_rate
         ).to(device)
 
         # Bass
-        unmix_b = model.OpenUnmix(
-            input_mean=mean,
-            input_scale=scale,
-            nb_channels=1,
-            hidden_size=256,
-            n_fft=2048,
-            n_hop=1024,
-            max_bin=64,
-            sample_rate=44100
+        self.unmix_b = model.OpenUnmix(
+            input_mean=input_mean,
+            input_scale=input_scale,
+            nb_channels=nb_channels,
+            hidden_size=hidden_size,
+            n_fft=n_fft,
+            n_hop=n_hop,
+            max_bin=max_bin,
+            sample_rate=sample_rate
         ).to(device)
 
         # Others
-        unmix_o = model.OpenUnmix(
-            input_mean=mean,
-            input_scale=scale,
-            nb_channels=1,
-            hidden_size=256,
-            n_fft=2048,
-            n_hop=1024,
-            max_bin=64,
-            sample_rate=44100
+        self.unmix_o = model.OpenUnmix(
+            input_mean=input_mean,
+            input_scale=input_scale,
+            nb_channels=nb_channels,
+            hidden_size=hidden_size,
+            n_fft=n_fft,
+            n_hop=n_hop,
+            max_bin=max_bin,
+            sample_rate=sample_rate
         ).to(device)
 
     def forward(self, x):
-        Y_hat_vocals = unmix_v.half_forward(x)
-        Y_hat_drums = unmix_d.half_forward(x)
-        Y_hat_bass = unmix_b.half_forward(x)
-        Y_hat_other = unmix_o.half_forward(x)
+        Y_hat_vocals = self.unmix_v.half_forward(x)
+        Y_hat_drums = self.unmix_d.half_forward(x)
+        Y_hat_bass = self.unmix_b.half_forward(x)
+        Y_hat_other = self.unmix_o.half_forward(x)
 
-        Y_hat_vocals_f = unmix_v(Y_hat_vocals.clone(), Y_hat_drums, Y_hat_bass, Y_hat_other, y_vocals)
-        Y_hat_drums_f = unmix_d(Y_hat_drums.clone(), Y_hat_vocals, Y_hat_bass, Y_hat_other, y_drums)
-        Y_hat_bass_f = unmix_b(Y_hat_bass.clone(), Y_hat_vocals, Y_hat_drums, Y_hat_other, y_bass)
-        Y_hat_other_f = unmix_o(Y_hat_other.clone(), Y_hat_vocals, Y_hat_drums, Y_hat_bass, y_other)
+        Y_hat_vocals_f = self.unmix_v(Y_hat_vocals.clone(), Y_hat_drums, Y_hat_bass, Y_hat_other, y_vocals)
+        Y_hat_drums_f = self.unmix_d(Y_hat_drums.clone(), Y_hat_vocals, Y_hat_bass, Y_hat_other, y_drums)
+        Y_hat_bass_f = self.unmix_b(Y_hat_bass.clone(), Y_hat_vocals, Y_hat_drums, Y_hat_other, y_bass)
+        Y_hat_other_f = self.unmix_o(Y_hat_other.clone(), Y_hat_vocals, Y_hat_drums, Y_hat_bass, y_other)
 
         return Y_hat_vocals_f, Y_hat_drums_f, Y_hat_bass_f, Y_hat_other_f
