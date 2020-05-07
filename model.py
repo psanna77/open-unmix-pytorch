@@ -214,14 +214,14 @@ class OpenUnmix(nn.Module):
 
         return x
 
-    def forward(self, x, x1, x2, x3):
-        # # check for waveform or spectrogram
-        # # transform to spectrogram if (nb_samples, nb_channels, nb_timesteps)
-        # # and reduce feature dimensions, therefore we reshape
-        # x = self.transform(x)
-        # nb_frames, nb_samples, nb_channels, nb_bins = x.data.shape
-        #
-        # mix = x.detach().clone()
+    def forward(self, x, x1, x2, x3, og):
+        # check for waveform or spectrogram
+        # transform to spectrogram if (nb_samples, nb_channels, nb_timesteps)
+        # and reduce feature dimensions, therefore we reshape
+        og = self.transform(og)
+        nb_frames, nb_samples, nb_channels, nb_bins = og.data.shape
+
+        mix = og.detach().clone()
         #
         # # crop
         # x = x[..., :self.nb_bins]
