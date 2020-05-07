@@ -252,6 +252,7 @@ class OpenUnmix(nn.Module):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         max_shape = max(max(max(x.shape[0], x1.shape[0]), x2.shape[0]), x3.shape[0])
+        og_shape = x.shape[0]
 
         x_pad, lstm_out_pad, x1_pad, x2_pad, x3_pad = x.clone(), lstm_out[0].clone(), x1.clone(), x2.clone(), x3.clone()
         if x.shape[0] < max_shape:
@@ -291,6 +292,7 @@ class OpenUnmix(nn.Module):
         x = self.bn3(x)
 
         # reshape back to original dim
+        x = x[:og_shape, :, :]
         x = x.reshape(nb_frames, nb_samples, nb_channels, self.nb_output_bins)
 
         # apply output scaling
