@@ -275,6 +275,7 @@ class OpenUnmix(nn.Module):
         print(x1_pad.shape)
         print(x2_pad.shape)
         print(x3_pad.shape)
+        print("HHHHH")
 
         # lstm skip connection
         x = torch.cat([x_pad, lstm_out_pad, x1_pad, x2_pad, x3_pad], -1)
