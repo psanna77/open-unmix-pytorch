@@ -148,7 +148,7 @@ class OpenUnmix(nn.Module):
         )
 
         self.fc2 = Linear(
-            in_features=hidden_size*2*3,
+            in_features=hidden_size*5,
             out_features=hidden_size,
             bias=False
         )
