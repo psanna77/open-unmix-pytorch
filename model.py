@@ -249,9 +249,9 @@ class OpenUnmix(nn.Module):
         print(x3.shape)
         print("********")
 
-        x1_pad = th.zeros(x.shape)
-        x2_pad = th.zeros(x.shape)
-        x3_pad = th.zeros(x.shape)
+        x1_pad = torch.zeros(x.shape)
+        x2_pad = torch.zeros(x.shape)
+        x3_pad = torch.zeros(x.shape)
 
         x1_pad[:x1.shape[0], :, :] = x1
         x2_pad[:x2.shape[0], :, :] = x2
