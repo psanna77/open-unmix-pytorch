@@ -286,7 +286,7 @@ class Separator(nn.Module):
                  ):
         super(Separator, self).__init__()
         # Vocals
-        self.unmix_v = model.OpenUnmix(
+        self.unmix_v = OpenUnmix(
             input_mean=input_mean,
             input_scale=input_scale,
             nb_channels=nb_channels,
@@ -298,7 +298,7 @@ class Separator(nn.Module):
         ).to(device)
 
         # Drums
-        self.unmix_d = model.OpenUnmix(
+        self.unmix_d = OpenUnmix(
             input_mean=input_mean,
             input_scale=input_scale,
             nb_channels=nb_channels,
@@ -310,7 +310,7 @@ class Separator(nn.Module):
         ).to(device)
 
         # Bass
-        self.unmix_b = model.OpenUnmix(
+        self.unmix_b = OpenUnmix(
             input_mean=input_mean,
             input_scale=input_scale,
             nb_channels=nb_channels,
@@ -322,7 +322,7 @@ class Separator(nn.Module):
         ).to(device)
 
         # Others
-        self.unmix_o = model.OpenUnmix(
+        self.unmix_o = OpenUnmix(
             input_mean=input_mean,
             input_scale=input_scale,
             nb_channels=nb_channels,
