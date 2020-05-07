@@ -284,7 +284,7 @@ class Separator(nn.Module):
                  power=1,
                  device='cpu'
                  ):
-        super(OpenUnmix, self).__init__()
+        super(Separator, self).__init__()
         # Vocals
         unmix_v = model.OpenUnmix(
             input_mean=mean,
