@@ -339,9 +339,9 @@ class Separator(nn.Module):
         Y_hat_bass = self.unmix_b.half_forward(x)
         Y_hat_other = self.unmix_o.half_forward(x)
 
-        Y_hat_vocals_f = self.unmix_v(Y_hat_vocals.clone(), Y_hat_drums, Y_hat_bass, Y_hat_other, y_vocals)
-        Y_hat_drums_f = self.unmix_d(Y_hat_drums.clone(), Y_hat_vocals, Y_hat_bass, Y_hat_other, y_drums)
-        Y_hat_bass_f = self.unmix_b(Y_hat_bass.clone(), Y_hat_vocals, Y_hat_drums, Y_hat_other, y_bass)
-        Y_hat_other_f = self.unmix_o(Y_hat_other.clone(), Y_hat_vocals, Y_hat_drums, Y_hat_bass, y_other)
+        Y_hat_vocals_f = self.unmix_v(Y_hat_vocals.clone(), Y_hat_drums, Y_hat_bass, Y_hat_other, x)
+        Y_hat_drums_f = self.unmix_d(Y_hat_drums.clone(), Y_hat_vocals, Y_hat_bass, Y_hat_other, x)
+        Y_hat_bass_f = self.unmix_b(Y_hat_bass.clone(), Y_hat_vocals, Y_hat_drums, Y_hat_other, x)
+        Y_hat_other_f = self.unmix_o(Y_hat_other.clone(), Y_hat_vocals, Y_hat_drums, Y_hat_bass, x)
 
         return Y_hat_vocals_f, Y_hat_drums_f, Y_hat_bass_f, Y_hat_other_f
