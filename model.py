@@ -249,6 +249,8 @@ class OpenUnmix(nn.Module):
         print(x3.shape)
         print("********")
 
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
         x1_pad = torch.zeros(x.shape).to(device)
         x2_pad = torch.zeros(x.shape).to(device)
         x3_pad = torch.zeros(x.shape).to(device)
