@@ -14,10 +14,10 @@ class NoOp(nn.Module):
 
 class STFT(nn.Module):
     def __init__(
-        self,
-        n_fft=4096,
-        n_hop=1024,
-        center=False
+            self,
+            n_fft=4096,
+            n_hop=1024,
+            center=False
     ):
         super(STFT, self).__init__()
         self.window = nn.Parameter(
@@ -37,7 +37,7 @@ class STFT(nn.Module):
         nb_samples, nb_channels, nb_timesteps = x.size()
 
         # merge nb_samples and nb_channels for multichannel stft
-        x = x.reshape(nb_samples*nb_channels, -1)
+        x = x.reshape(nb_samples * nb_channels, -1)
 
         # compute stft with parameters as close as possible scipy settings
         stft_f = torch.stft(
@@ -57,9 +57,9 @@ class STFT(nn.Module):
 
 class Spectrogram(nn.Module):
     def __init__(
-        self,
-        power=1,
-        mono=True
+            self,
+            power=1,
+            mono=True
     ):
         super(Spectrogram, self).__init__()
         self.power = power
@@ -86,19 +86,19 @@ class Spectrogram(nn.Module):
 
 class OpenUnmix(nn.Module):
     def __init__(
-        self,
-        n_fft=4096,
-        n_hop=1024,
-        input_is_spectrogram=False,
-        hidden_size=512,
-        nb_channels=2,
-        sample_rate=44100,
-        nb_layers=3,
-        input_mean=None,
-        input_scale=None,
-        max_bin=None,
-        unidirectional=False,
-        power=1,
+            self,
+            n_fft=4096,
+            n_hop=1024,
+            input_is_spectrogram=False,
+            hidden_size=512,
+            nb_channels=2,
+            sample_rate=44100,
+            nb_layers=3,
+            input_mean=None,
+            input_scale=None,
+            max_bin=None,
+            unidirectional=False,
+            power=1,
     ):
         """
         Input: (nb_samples, nb_channels, nb_timesteps)
@@ -127,7 +127,7 @@ class OpenUnmix(nn.Module):
             self.transform = nn.Sequential(self.stft, self.spec)
 
         self.fc1 = Linear(
-            self.nb_bins*nb_channels, hidden_size,
+            self.nb_bins * nb_channels, hidden_size,
             bias=False
         )
 
@@ -148,7 +148,7 @@ class OpenUnmix(nn.Module):
         )
 
         self.fc2 = Linear(
-            in_features=hidden_size*5,
+            in_features=hidden_size * 5,
             out_features=hidden_size,
             bias=False
         )
@@ -157,11 +157,11 @@ class OpenUnmix(nn.Module):
 
         self.fc3 = Linear(
             in_features=hidden_size,
-            out_features=self.nb_output_bins*nb_channels,
+            out_features=self.nb_output_bins * nb_channels,
             bias=False
         )
 
-        self.bn3 = BatchNorm1d(self.nb_output_bins*nb_channels)
+        self.bn3 = BatchNorm1d(self.nb_output_bins * nb_channels)
 
         if input_mean is not None:
             input_mean = torch.from_numpy(
@@ -172,7 +172,7 @@ class OpenUnmix(nn.Module):
 
         if input_scale is not None:
             input_scale = torch.from_numpy(
-                1.0/input_scale[:self.nb_bins]
+                1.0 / input_scale[:self.nb_bins]
             ).float()
         else:
             input_scale = torch.ones(self.nb_bins)
@@ -266,3 +266,82 @@ class OpenUnmix(nn.Module):
         x = F.relu(x) * mix
 
         return x
+
+
+class Separator(nn.Module):
+    def __init__(self,
+                 n_fft=4096,
+                 n_hop=1024,
+                 input_is_spectrogram=False,
+                 hidden_size=512,
+                 nb_channels=2,
+                 sample_rate=44100,
+                 nb_layers=3,
+                 input_mean=None,
+                 input_scale=None,
+                 max_bin=None,
+                 unidirectional=False,
+                 power=1,
+                 device='cpu'
+                 ):
+        super(OpenUnmix, self).__init__()
+        # Vocals
+        unmix_v = model.OpenUnmix(
+            input_mean=mean,
+            input_scale=scale,
+            nb_channels=1,
+            hidden_size=256,
+            n_fft=2048,
+            n_hop=1024,
+            max_bin=64,
+            sample_rate=44100
+        ).to(device)
+
+        # Drums
+        unmix_d = model.OpenUnmix(
+            input_mean=mean,
+            input_scale=scale,
+            nb_channels=1,
+            hidden_size=256,
+            n_fft=2048,
+            n_hop=1024,
+            max_bin=64,
+            sample_rate=44100
+        ).to(device)
+
+        # Bass
+        unmix_b = model.OpenUnmix(
+            input_mean=mean,
+            input_scale=scale,
+            nb_channels=1,
+            hidden_size=256,
+            n_fft=2048,
+            n_hop=1024,
+            max_bin=64,
+            sample_rate=44100
+        ).to(device)
+
+        # Others
+        unmix_o = model.OpenUnmix(
+            input_mean=mean,
+            input_scale=scale,
+            nb_channels=1,
+            hidden_size=256,
+            n_fft=2048,
+            n_hop=1024,
+            max_bin=64,
+            sample_rate=44100
+        ).to(device)
+
+    def forward(self, x):
+        Y_hat_vocals = unmix_v.half_forward(x)
+        Y_hat_drums = unmix_d.half_forward(x)
+        Y_hat_bass = unmix_b.half_forward(x)
+        Y_hat_other = unmix_o.half_forward(x)
+
+        Y_hat_vocals_f = unmix_v(Y_hat_vocals.clone(), Y_hat_drums, Y_hat_bass, Y_hat_other, y_vocals)
+        Y_hat_drums_f = unmix_d(Y_hat_drums.clone(), Y_hat_vocals, Y_hat_bass, Y_hat_other, y_drums)
+        Y_hat_bass_f = unmix_b(Y_hat_bass.clone(), Y_hat_vocals, Y_hat_drums, Y_hat_other, y_bass)
+        Y_hat_other_f = unmix_o(Y_hat_other.clone(), Y_hat_vocals, Y_hat_drums, Y_hat_bass, y_other)
+
+        return Y_hat_vocals_f, Y_hat_drums_f, Y_hat_bass_f, Y_hat_other_f
