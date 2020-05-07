@@ -251,19 +251,27 @@ class OpenUnmix(nn.Module):
 
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        x1_pad, x2_pad, x3_pad = x1, x2, x3
-        if x1.shape[0] < x.shape[0]:
-            x1_pad = torch.zeros(x.shape[0] - x1.shape[0], x.shape[1], x.shape[2]).to(device)
+        max_shape = max(max(max(x.shape[0], x1.shape[0]), x2.shape[0]), x3.shape[0])
+
+        x_pad, lstm_out_pad, x1_pad, x2_pad, x3_pad = x, lstm_out[0], x1, x2, x3
+        if x.shape[0] < max_shape:
+            x_pad = torch.zeros(max_shape - x.shape[0], x.shape[1], x.shape[2]).to(device)
+            x1_pad = torch.cat([x, x_pad], dim=0)
+        if lstm_out[0].shape[0] < max_shape:
+            lstm_out_pad = torch.zeros(max_shape - x.shape[0], x.shape[1], x.shape[2]).to(device)
+            lstm_out_pad = torch.cat([lstm_out[0], lstm_out_pad], dim=0)
+        if x1.shape[0] < max_shape:
+            x1_pad = torch.zeros(max_shape - x1.shape[0], x.shape[1], x.shape[2]).to(device)
             x1_pad = torch.cat([x1, x1_pad], dim=0)
-        if x2.shape[0] < x.shape[0]:
-            x2_pad = torch.zeros(x.shape[0] - x2.shape[0], x.shape[1], x.shape[2]).to(device)
+        if x2.shape[0] < max_shape:
+            x2_pad = torch.zeros(max_shape - x2.shape[0], x.shape[1], x.shape[2]).to(device)
             x2_pad = torch.cat([x2, x2_pad], dim=0)
-        if x3.shape[0] < x.shape[0]:
-            x3_pad = torch.zeros(x.shape[0] - x3.shape[0], x.shape[1], x.shape[2]).to(device)
+        if x3.shape[0] < max_shape:
+            x3_pad = torch.zeros(max_shape - x3.shape[0], x.shape[1], x.shape[2]).to(device)
             x3_pad = torch.cat([x3, x3_pad], dim=0)
 
         # lstm skip connection
-        x = torch.cat([x, lstm_out[0], x1_pad, x2_pad, x3_pad], -1)
+        x = torch.cat([x_pad, lstm_out_pad, x1_pad, x2_pad, x3_pad], -1)
 
         # first dense stage + batch norm
         x = self.fc2(x.reshape(-1, x.shape[-1]))
