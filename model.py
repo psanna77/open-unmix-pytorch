@@ -270,6 +270,12 @@ class OpenUnmix(nn.Module):
             x3_pad = torch.zeros(max_shape - x3.shape[0], x.shape[1], x.shape[2]).to(device)
             x3_pad = torch.cat([x3, x3_pad], dim=0)
 
+        print(x_pad.shape)
+        print(lstm_out_pad.shape)
+        print(x1_pad.shape)
+        print(x2_pad.shape)
+        print(x3_pad.shape)
+
         # lstm skip connection
         x = torch.cat([x_pad, lstm_out_pad, x1_pad, x2_pad, x3_pad], -1)
 
