@@ -242,13 +242,6 @@ class OpenUnmix(nn.Module):
         # apply 3-layers of stacked LSTM
         lstm_out = self.lstm(x)
 
-        print(x.shape)
-        print(lstm_out[0].shape)
-        print(x1.shape)
-        print(x2.shape)
-        print(x3.shape)
-        print("********")
-
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         max_shape = x.shape[0]
@@ -269,11 +262,6 @@ class OpenUnmix(nn.Module):
             x3_pad = torch.cat([x3, x3_pad], dim=0)
         elif x3.shape[0] > max_shape:
             x3_pad = x3_pad[:max_shape, :, :]
-
-        print(x1_pad.shape)
-        print(x2_pad.shape)
-        print(x3_pad.shape)
-        print("HHHHH")
 
         # lstm skip connection
         x = torch.cat([x, lstm_out[0], x1_pad, x2_pad, x3_pad], -1)
