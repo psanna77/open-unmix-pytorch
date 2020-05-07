@@ -251,13 +251,16 @@ class OpenUnmix(nn.Module):
 
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        x1_pad = torch.zeros(x.shape).to(device)
-        x2_pad = torch.zeros(x.shape).to(device)
-        x3_pad = torch.zeros(x.shape).to(device)
-
-        x1_pad[:x1.shape[0], 0:-1, 0:-1] = x1
-        x2_pad[:x2.shape[0], 0:-1, 0:-1] = x2
-        x3_pad[:x3.shape[0], 0:-1, 0:-1] = x3
+        x1_pad, x2_pad, x3_pad = x1, x2, x3
+        if x1.shape[0] < x.shape[0]:
+            x1_pad = torch.zeros(x.shape[0] - x1.shape[0], x.shape[2], x.shape[3]).to(device)
+            x1_pad = torch.cat([x1, x1_pad], dim=0)
+        if x2.shape[0] < x.shape[0]:
+            x2_pad = torch.zeros(x.shape[0] - x2.shape[0], x.shape[2], x.shape[3]).to(device)
+            x2_pad = torch.cat([x2, x2_pad], dim=0)
+        if x3.shape[0] < x.shape[0]:
+            x3_pad = torch.zeros(x.shape[0] - x3.shape[0], x.shape[2], x.shape[3]).to(device)
+            x3_pad = torch.cat([x3, x3_pad], dim=0)
 
         # lstm skip connection
         x = torch.cat([x, lstm_out[0], x1_pad, x2_pad, x3_pad], -1)
