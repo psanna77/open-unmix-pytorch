@@ -249,8 +249,16 @@ class OpenUnmix(nn.Module):
         print(x3.shape)
         print("********")
 
+        x1_pad = th.zeros(x.shape)
+        x2_pad = th.zeros(x.shape)
+        x3_pad = th.zeros(x.shape)
+
+        x1_pad[:x1.shape[0], :, :] = x1
+        x2_pad[:x2.shape[0], :, :] = x2
+        x3_pad[:x3.shape[0], :, :] = x3
+
         # lstm skip connection
-        x = torch.cat([x, lstm_out[0], x1, x2, x3], -1)
+        x = torch.cat([x, lstm_out[0], x1_pad, x2_pad, x3_pad], -1)
 
         # first dense stage + batch norm
         x = self.fc2(x.reshape(-1, x.shape[-1]))
