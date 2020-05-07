@@ -270,8 +270,6 @@ class OpenUnmix(nn.Module):
         elif x3.shape[0] > max_shape:
             x3_pad = x3_pad[:max_shape, :, :]
 
-        print(x_pad.shape)
-        print(lstm_out_pad.shape)
         print(x1_pad.shape)
         print(x2_pad.shape)
         print(x3_pad.shape)
